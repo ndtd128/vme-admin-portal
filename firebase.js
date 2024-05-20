@@ -1,5 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import {
+  getDatabase, ref as dbRef, onValue, set,
+} from 'firebase/database';
+import {
+  uploadBytesResumable,
+  getDownloadURL,
+  getStorage,
+  ref as storeageRef,
+} from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCzhqHdXfs40Oisn5gfnE7mfDiZ4xjurPQ',
@@ -14,16 +22,31 @@ const firebaseConfig = {
 
 const FirebaseApp = initializeApp(firebaseConfig);
 
+const storage = getStorage(FirebaseApp);
 const db = getDatabase(FirebaseApp);
 
-function fetchModelsData() {
-  const modelsRef = ref(db, 'vme-ar');
+function fetchModels() {
+  const modelsRef = dbRef(db, 'vme-ar');
   onValue(modelsRef, (snapshot) => {
     const data = snapshot.val();
     console.log(data);
   });
 }
 
-fetchModelsData();
+async function addModels(userId, name, description, imageFile) {
+  const imageRef = storeageRef(storage, `images/${imageFile.name}`);
+  const imageSnapshot = await uploadBytesResumable(imageRef, imageFile);
+  const imageUrl = await getDownloadURL(imageSnapshot.ref);
 
-export default { FirebaseApp, db };
+  set(dbRef(db, `vme-ar/${userId}`), {
+    name,
+    description,
+    link_image: imageUrl,
+  });
+}
+
+await fetchModels();
+
+export default {
+  FirebaseApp, db, addModels, fetchModels,
+};
