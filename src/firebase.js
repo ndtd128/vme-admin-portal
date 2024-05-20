@@ -33,20 +33,24 @@ function fetchModels() {
   });
 }
 
-async function addModels(userId, name, description, imageFile) {
-  const imageRef = storeageRef(storage, `images/${imageFile.name}`);
-  const imageSnapshot = await uploadBytesResumable(imageRef, imageFile);
-  const imageUrl = await getDownloadURL(imageSnapshot.ref);
+async function addModels(userId, name, description, videoUrl, imageFile) {
+  try {
+    const imageRef = storeageRef(storage, `images/${imageFile.name + userId}`);
+    const imageSnapshot = await uploadBytesResumable(imageRef, imageFile);
+    const imageUrl = await getDownloadURL(imageSnapshot.ref);
 
-  set(dbRef(db, `vme-ar/${userId}`), {
-    name,
-    description,
-    link_image: imageUrl,
-  });
+    set(dbRef(db, `vme-ar/${userId}`), {
+      name,
+      description,
+      video_link: videoUrl,
+      link_image: imageUrl,
+    });
+  } catch (error) {
+    return error;
+  }
+  return 'OK';
 }
 
-await fetchModels();
-
-export default {
+export {
   FirebaseApp, db, addModels, fetchModels,
 };
