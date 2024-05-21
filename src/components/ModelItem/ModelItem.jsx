@@ -19,12 +19,12 @@ function ModelItem({ model }) {
         },
       }}
     >
-      {model.image && (
+      {model.link_image && (
         <CardContent>
           <CardMedia
             component="img"
             height="140"
-            image={model.image}
+            image={model.link_image}
             alt={model.name}
             sx={{ marginBottom: '1rem' }}
           />
@@ -51,7 +51,7 @@ function ModelItem({ model }) {
           <Typography variant="body2" color="text.secondary">
             Đường dẫn video:
             {' '}
-            <Link href={model.image} target="_blank">
+            <Link href={model.video_link} target="_blank">
               Link
             </Link>
           </Typography>

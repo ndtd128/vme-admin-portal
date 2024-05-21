@@ -4,7 +4,6 @@ import {
   FormControl, Grid, TextField, Button, CircularProgress,
 } from '@mui/material';
 import { AddCircle } from '@mui/icons-material';
-import { v4 as uuidv4 } from 'uuid';
 import { addModels } from '../firebase';
 
 function AddModel() {
@@ -34,7 +33,7 @@ function AddModel() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await addModels(uuidv4(), modelName, description, videoLink, image);
+      const res = await addModels(modelName, description, videoLink, image);
       if (res === 'OK') {
         setRegisterSuccess(true);
       }

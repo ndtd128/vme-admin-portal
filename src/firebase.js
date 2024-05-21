@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getDatabase, ref as dbRef, onValue, set,
+  getDatabase, ref as dbRef, set, get,
 } from 'firebase/database';
 import {
   uploadBytesResumable,
@@ -21,25 +21,27 @@ const firebaseConfig = {
 };
 
 const FirebaseApp = initializeApp(firebaseConfig);
-
 const storage = getStorage(FirebaseApp);
 const db = getDatabase(FirebaseApp);
 
-function fetchModels() {
-  const modelsRef = dbRef(db, 'vme-ar');
-  onValue(modelsRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log(data);
+async function getLastId() {
+  const modelsRef = dbRef(db, 'models');
+  let max = -1;
+  const snapshot = await get(modelsRef);
+  snapshot.forEach((childSnapshot) => {
+    if (Number(childSnapshot.key) > max) {
+      max = Number(childSnapshot.key);
+    }
   });
+  return max;
 }
-
-async function addModels(userId, name, description, videoUrl, imageFile) {
+async function addModels(name, description, videoUrl, imageFile) {
   try {
+    const userId = Number(await getLastId()) + 1;
     const imageRef = storeageRef(storage, `images/${imageFile.name + userId}`);
     const imageSnapshot = await uploadBytesResumable(imageRef, imageFile);
     const imageUrl = await getDownloadURL(imageSnapshot.ref);
-
-    set(dbRef(db, `vme-ar/${userId}`), {
+    set(dbRef(db, `models/${userId}`), {
       name,
       description,
       video_link: videoUrl,
@@ -52,5 +54,5 @@ async function addModels(userId, name, description, videoUrl, imageFile) {
 }
 
 export {
-  FirebaseApp, db, addModels, fetchModels,
+  FirebaseApp, db, addModels,
 };
